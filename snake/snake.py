@@ -73,7 +73,7 @@ class Snake:
                     self.body.pop(0)
                 else:
                     apple.respawn()
-                    self.score += 5
+                    self.score += 1
         self.draw()
 
     def draw(self):
