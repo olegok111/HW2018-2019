@@ -10,6 +10,7 @@ v = 10  # speed
 fps = 10
 score = 0
 level = 1
+level_changed = False
 
 fieldw = [(i) for i in range(0, w, wi)]  # field by width
 fieldh = [(i) for i in range(0, h, he)]  # field by height
@@ -163,6 +164,8 @@ while operation:
                 nap = "u"
             elif pressed[pygame.K_DOWN] and nap != "u":
                 nap = "d"
+            elif pressed[pygame.K_KP_PLUS]:
+                score += 1
             
             predx = bod[len(bod)-1].x
             predy = bod[len(bod)-1].y
@@ -175,14 +178,19 @@ while operation:
             if ad:
                 bod.append(Body(predx, predy, wi, he, BLACK, v))
                 fps += 1
+                score += 1
+            if score % 15 == 0 and score != 0 and not level_changed:
+                level += 1
+                fps = 10
+                level_changed = True
                 
             for i in range(0, len(bod)):
                 bod[i].draw()    
 
             level_text_surface = my_font.render('LEVEL:' + str(level), False, DBLUE)
             score_text_surface = my_font.render('SCORE:' + str(score), False, DBLUE)
-            screen.blit(level_text_surface, (20, 20))
-            screen.blit(score_text_surface, (20, 45))
+            screen.blit(level_text_surface, (20, 620))
+            screen.blit(score_text_surface, (170, 620))
             clock.tick(fps)
             pygame.display.flip()
     screen.fill(BLACK)
