@@ -12,6 +12,12 @@ level = 1
 food_count = 0
 level_changed = False
 
+OBST_BANK_0 = [(i, j) for i in range(0, w, wi) for j in (290, 300)]
+OBST_BANK_1 = [(i, j) for i in range(0, w, wi) for j in (290, 300)] + \
+              [(i, j) for i in (290, 300) for j in range(0, 290, he)] + \
+              [(i, j) for i in (290, 300) for j in range(310, 600, he)]
+OBST_BANK_2 = [(i, j) for i in (140,150,290,300,440,450) for j in range(0, h, he)]
+
 fieldw = [i for i in range(0, w, wi)]  # field by width
 fieldh = [i for i in range(0, h, he)]  # field by height
 
@@ -19,10 +25,8 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 DBLUE = (0, 0, 200)
 GREEN = (0, 200, 0)
+LGREEN = (230, 255, 230)
 RED = (255, 0, 0)
-colors = []
-for i in range(256):
-    colors.append((i, 0, 0))  # colors from black to full-red
 
 
 class Body:
@@ -45,8 +49,8 @@ class Body:
 
 class Head(Body):
 
-    def mov(self, w, h, nap, food_queue, bod, obstacles):
-        global ad, done
+    def mov(self, w, h, nap, bod, obstacles):
+        global ad, done, food
         for i in bod:
             if nap == "u":
                 if self.y - self.v == i.y and self.x == i.x:
@@ -88,8 +92,8 @@ class Head(Body):
                     self.x = 0
                 else:
                     self.x += self.v
-            if self.x == food_queue[0].x and self.y == food_queue[0].y:
-                food_queue.pop(0)  # deleting the first element of Food Queue(TM)
+            if self.x == food.x and self.y == food.y:
+                food = None
                 ad = True
         self.draw()
 
@@ -124,10 +128,11 @@ while operation:
     pressed = pygame.key.get_pressed()
     if pressed[pygame.K_SPACE]:
         bod = []
-        obstacles = [(i, j) for i in range(0, w, wi) for j in (290, 300)]
-        food_queue = []  # initialization of Food Queue(TM)
+        obstacles = OBST_BANK_0
+        next_obstacles = OBST_BANK_1
         nap = "u"  # direction = "up"
         done = False
+        food = None
         x = random.choice(fieldw)
         y = random.choice(fieldh)
         bod.append(Head(x, y, wi, he, BLACK, v))
@@ -139,25 +144,22 @@ while operation:
                     done = True
 
             ad = False
-            if len(food_queue) == 0:
+            if food == None:
                 a = random.choice(fieldw)
                 b = random.choice(fieldh)
-                flag = True
-                while flag:  # choosing food location
-                    for i in bod:
-                        if a == i.x and b == i.y:
-                            a = random.choice(fieldw)
-                            b = random.choice(fieldh)
-                            break
-                        else:
-                            flag = False
-                            break
-                food_queue.append(Ball(a, b, wi, he, RED))  # adding to Food Queue(TM)
+                food_position_illegal = True
+                while food_position_illegal:  # choosing food location
+                    if a == bod[0].x and b == bod[0].y or (a, b) in obstacles:
+                        a = random.choice(fieldw)
+                        b = random.choice(fieldh)
+                    else:
+                        food_position_illegal = False
+                food = (Ball(a, b, wi, he, RED))
 
             screen.fill(WHITE)
             pygame.draw.line(screen, BLACK, [w, 0], [w, h], 1)
             pygame.draw.line(screen, BLACK, [0, h], [w, h], 1)  # drawing borders
-            food_queue[0].draw()  # drawing the first element of Food Queue(TM)
+            food.draw()
 
             pressed = pygame.key.get_pressed()
             if pressed[pygame.K_LEFT] and nap != "r":
@@ -179,7 +181,7 @@ while operation:
             for i in range(len(bod) - 1, 0, -1):
                 bod[i].move(bod, i)
 
-            bod[0].mov(w, h, nap, food_queue, bod, obstacles)
+            bod[0].mov(w, h, nap, bod, obstacles)
 
             if ad:
                 bod.append(Body(predx, predy, wi, he, BLACK, v))
@@ -191,15 +193,16 @@ while operation:
                 level += 1
                 fps = 10
                 level_changed = True
+                obstacles = next_obstacles
                 if level == 2:
-                    obstacles = [(i, j) for i in range(0, w, wi) for j in (290, 300)] + \
-                                [(i, j) for i in (290, 300) for j in range(0, 290, he)] + \
-                                [(i, j) for i in (290, 300) for j in range(310, 600, he)]
+                    next_obstacles = OBST_BANK_2
 
-            for bod_block in bod:
-                bod_block.draw()
+            for n_obst in next_obstacles:
+                pygame.draw.rect(screen, GREEN, [n_obst[0]+4, n_obst[1]+4, 2, 2])
             for obst in obstacles:
                 pygame.draw.rect(screen, GREEN, [obst[0], obst[1], wi, he])
+            for bod_block in bod:
+                bod_block.draw()
 
             level_text_surface = my_font.render('LEVEL:' + str(level), False, DBLUE)
             score_text_surface = my_font.render('SCORE:' + str(score), False, DBLUE)
