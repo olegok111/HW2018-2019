@@ -13,7 +13,7 @@ OBST_BANK_0 = tuple((i, j) for i in range(0, w, wi) for j in (290, 300))
 OBST_BANK_1 = tuple((i, j) for i in range(0, w, wi) for j in (290, 300)) + \
               tuple((i, j) for i in (290, 300) for j in range(0, 290, he)) + \
               tuple((i, j) for i in (290, 300) for j in range(310, h, he))
-OBST_BANK_2 = tuple((i, j) for i in (140,150,290,300,440,450) for j in range(0, h, he))
+OBST_BANK_2 = tuple((i, j) for i in (140,150,290,300,440,450) for j in range(30, 580, he))
 OBST_BANK_3 = tuple((i, j) for i in (140,150,290,300,440,450) for j in range(0, 260, he)) + \
               tuple((i, j) for i in (140,150,290,300,440,450) for j in range(340, h, he)) + OBST_BANK_0
 OBST_BANK_4 = tuple((i, j) for i in range(0, w, wi) for j in (0, 10, 580, 590)) + \
@@ -162,7 +162,7 @@ def stats_reset():
 size = [w + 100, h + 100]
 screen = pygame.display.set_mode(size)
 pygame.display.set_mode(size)
-pygame.display.set_caption("Press Space to start")
+pygame.display.set_caption("Snake N v1.01 [Press Space to start]")
 clock = pygame.time.Clock()
 operation = True
 pygame.font.init()
@@ -228,11 +228,12 @@ while operation:
 
             if ad:
                 bod.append(Body(predx, predy, wi, he, BLACK, v))
-                fps += 1
+                if fps <= 20:
+                    fps += 1
                 score += level
                 food_count += 1
                 level_changed = False
-            if food_count % LEVEL_CHANGE_RATE == 0 and food_count != 0 and not level_changed:
+            if food_count % LEVEL_CHANGE_RATE == 0 and food_count != 0 and not level_changed and level <= 5:
                 level += 1
                 fps = 10
                 level_changed = True
@@ -253,7 +254,10 @@ while operation:
             for bod_block in bod:
                 bod_block.draw()
 
-            level_text_surface = my_font.render('LEVEL:' + str(level), False, DBLUE)
+            if level <= 5:
+                level_text_surface = my_font.render('LEVEL:' + str(level), False, DBLUE)
+            else:
+                level_text_surface = my_font.render('LEVEL:Inf.', False, DBLUE)
             score_text_surface = my_font.render('SCORE:' + str(score), False, DBLUE)
             lives_text_surface = my_font.render('LIVES:' + str(lives), False, RED)
             screen.blit(level_text_surface, (20, 620))
