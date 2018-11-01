@@ -6,12 +6,8 @@ w = 600  # width of playable screen
 wi = 10  # width of block
 he = 10  # height of block
 v = 10  # speed
-fps = 10
-score = 0
-level = 1
-food_count = 0
-level_changed = False
 
+LEVEL_CHANGE_RATE = 10
 OBST_BANK_0 = [(i, j) for i in range(0, w, wi) for j in (290, 300)]
 OBST_BANK_1 = [(i, j) for i in range(0, w, wi) for j in (290, 300)] + \
               [(i, j) for i in (290, 300) for j in range(0, 290, he)] + \
@@ -50,27 +46,47 @@ class Body:
 class Head(Body):
 
     def mov(self, w, h, nap, bod, obstacles):
-        global ad, done, food
+        global ad, done, food, lives, dead
         for i in bod:
             if nap == "u":
                 if self.y - self.v == i.y and self.x == i.x:
-                    done = True
+                    lives -= 1
+                    if lives == 0:
+                        done = True
+                    else:
+                        body_generate()
                     break
             elif nap == "d":
                 if self.y + self.v == i.y and self.x == i.x:
-                    done = True
+                    lives -= 1
+                    if lives == 0:
+                        done = True
+                    else:
+                        body_generate()
                     break
             elif nap == "l":
                 if self.x - self.v == i.x and self.y == i.y:
-                    done = True
+                    lives -= 1
+                    if lives == 0:
+                        done = True
+                    else:
+                        body_generate()
                     break
             elif nap == "r":
                 if self.x + self.v == i.x and self.y == i.y:
-                    done = True
+                    lives -= 1
+                    if lives == 0:
+                        done = True
+                    else:
+                        body_generate()
                     break
         if (nap == "u" and (self.x, self.y - self.v) in obstacles) or (nap == "d" and (self.x, self.y + self.v) in obstacles) \
                 or (nap == "l" and (self.x - self.v, self.y) in obstacles) or (nap == "r" and (self.x + self.v, self.y) in obstacles):
-            done = True
+            lives -= 1
+            if lives == 0:
+                done = True
+            else:
+                body_generate()
         if not done:
             if nap == "u":
                 if self.y - self.v < 0:
@@ -111,6 +127,26 @@ class Ball:
         pygame.draw.ellipse(screen, self.color, [self.x, self.y, self.w, self.h], 0)
 
 
+def body_generate():
+    global bod, nap
+    bod = []
+    x = random.choice(fieldw)
+    y = random.choice(fieldh)
+    bod.append(Head(x, y, wi, he, BLACK, v))
+    for i in range(10, 21, 10):
+        bod.append(Body(x, y + i, wi, he, BLACK, v))
+    nap = "r"
+
+
+def stats_reset():
+    global fps, score, level, food_count, level_changed, lives
+    fps = 10
+    score = 0
+    level = 1
+    food_count = 0
+    level_changed = False
+    lives = 3
+
 size = [w + 100, h + 100]
 screen = pygame.display.set_mode(size)
 pygame.display.set_mode(size)
@@ -127,17 +163,12 @@ while operation:
 
     pressed = pygame.key.get_pressed()
     if pressed[pygame.K_SPACE]:
-        bod = []
         obstacles = OBST_BANK_0
         next_obstacles = OBST_BANK_1
-        nap = "u"  # direction = "up"
         done = False
         food = None
-        x = random.choice(fieldw)
-        y = random.choice(fieldh)
-        bod.append(Head(x, y, wi, he, BLACK, v))
-        for i in range(10, 21, 10):
-            bod.append(Body(x, y + i, wi, he, BLACK, v))
+        body_generate()
+        stats_reset()
         while not done:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -189,7 +220,7 @@ while operation:
                 score += level
                 food_count += 1
                 level_changed = False
-            if food_count % 10 == 0 and food_count != 0 and not level_changed:
+            if food_count % LEVEL_CHANGE_RATE == 0 and food_count != 0 and not level_changed:
                 level += 1
                 fps = 10
                 level_changed = True
@@ -206,8 +237,10 @@ while operation:
 
             level_text_surface = my_font.render('LEVEL:' + str(level), False, DBLUE)
             score_text_surface = my_font.render('SCORE:' + str(score), False, DBLUE)
+            lives_text_surface = my_font.render('LIVES:' + str(lives), False, RED)
             screen.blit(level_text_surface, (20, 620))
             screen.blit(score_text_surface, (170, 620))
+            screen.blit(lives_text_surface, (320, 620))
             clock.tick(fps)
             pygame.display.flip()
     screen.fill(BLACK)
