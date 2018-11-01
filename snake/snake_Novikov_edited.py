@@ -8,11 +8,18 @@ he = 10  # height of block
 v = 10  # speed
 
 LEVEL_CHANGE_RATE = 10
-OBST_BANK_0 = [(i, j) for i in range(0, w, wi) for j in (290, 300)]
-OBST_BANK_1 = [(i, j) for i in range(0, w, wi) for j in (290, 300)] + \
-              [(i, j) for i in (290, 300) for j in range(0, 290, he)] + \
-              [(i, j) for i in (290, 300) for j in range(310, 600, he)]
-OBST_BANK_2 = [(i, j) for i in (140,150,290,300,440,450) for j in range(0, h, he)]
+BEGIN_FPS = 10
+OBST_BANK_0 = tuple((i, j) for i in range(0, w, wi) for j in (290, 300))
+OBST_BANK_1 = tuple((i, j) for i in range(0, w, wi) for j in (290, 300)) + \
+              tuple((i, j) for i in (290, 300) for j in range(0, 290, he)) + \
+              tuple((i, j) for i in (290, 300) for j in range(310, h, he))
+OBST_BANK_2 = tuple((i, j) for i in (140,150,290,300,440,450) for j in range(0, h, he))
+OBST_BANK_3 = tuple((i, j) for i in (140,150,290,300,440,450) for j in range(0, 260, he)) + \
+              tuple((i, j) for i in (140,150,290,300,440,450) for j in range(340, h, he)) + OBST_BANK_0
+OBST_BANK_4 = tuple((i, j) for i in range(0, w, wi) for j in (0, 10, 580, 590)) + \
+              tuple((i, j) for i in (0, 10, 580, 590) for j in range(20, 580, he)) + \
+              tuple((i, j) for i in (290, 300) for j in range(0, 290, he)) + \
+              tuple((i, j) for i in (290, 300) for j in range(310, h, he))
 
 fieldw = [i for i in range(0, w, wi)]  # field by width
 fieldh = [i for i in range(0, h, he)]  # field by height
@@ -46,7 +53,7 @@ class Body:
 class Head(Body):
 
     def mov(self, w, h, nap, bod, obstacles):
-        global ad, done, food, lives, dead
+        global ad, done, food, lives, fps
         for i in bod:
             if nap == "u":
                 if self.y - self.v == i.y and self.x == i.x:
@@ -55,6 +62,7 @@ class Head(Body):
                         done = True
                     else:
                         body_generate()
+                        fps = BEGIN_FPS
                     break
             elif nap == "d":
                 if self.y + self.v == i.y and self.x == i.x:
@@ -63,6 +71,7 @@ class Head(Body):
                         done = True
                     else:
                         body_generate()
+                        fps = BEGIN_FPS
                     break
             elif nap == "l":
                 if self.x - self.v == i.x and self.y == i.y:
@@ -71,6 +80,7 @@ class Head(Body):
                         done = True
                     else:
                         body_generate()
+                        fps = BEGIN_FPS
                     break
             elif nap == "r":
                 if self.x + self.v == i.x and self.y == i.y:
@@ -79,6 +89,7 @@ class Head(Body):
                         done = True
                     else:
                         body_generate()
+                        fps = BEGIN_FPS
                     break
         if (nap == "u" and (self.x, self.y - self.v) in obstacles) or (nap == "d" and (self.x, self.y + self.v) in obstacles) \
                 or (nap == "l" and (self.x - self.v, self.y) in obstacles) or (nap == "r" and (self.x + self.v, self.y) in obstacles):
@@ -87,6 +98,7 @@ class Head(Body):
                 done = True
             else:
                 body_generate()
+                fps = BEGIN_FPS
         if not done:
             if nap == "u":
                 if self.y - self.v < 0:
@@ -140,7 +152,7 @@ def body_generate():
 
 def stats_reset():
     global fps, score, level, food_count, level_changed, lives
-    fps = 10
+    fps = BEGIN_FPS
     score = 0
     level = 1
     food_count = 0
@@ -227,6 +239,12 @@ while operation:
                 obstacles = next_obstacles
                 if level == 2:
                     next_obstacles = OBST_BANK_2
+                elif level == 3:
+                    next_obstacles = OBST_BANK_3
+                elif level == 4:
+                    next_obstacles = OBST_BANK_4
+                elif level >= 5:
+                    next_obstacles = []
 
             for n_obst in next_obstacles:
                 pygame.draw.rect(screen, GREEN, [n_obst[0]+4, n_obst[1]+4, 2, 2])
