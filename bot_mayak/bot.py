@@ -18,11 +18,13 @@ def search(bot, update, args):
     for arg in args:
         title += arg + ' '
     title = title[:-1]
-    if title in podcasts.keys():
-        bot.send_message(chat_id=update.message.chat_id, text="You\'re welcome! Here\'s the link:\n" + podcasts[title])
-    else:
-        bot.send_message(chat_id=update.message.chat_id, text="Sorry. This title is unfamiliar to me.")
-    print(title)
+    substr = ''
+    for k in podcasts.keys():
+        if title in k:
+            substr += k + podcasts[k] + '\n'
+    bot.send_message(chat_id=update.message.chat_id, text="Here's the variants:\n" + substr)
+    print("Here's the variants:\n" + substr)
+
 
 start_handler = CommandHandler('start', start)
 dispatcher.add_handler(start_handler)
