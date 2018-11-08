@@ -127,23 +127,10 @@ class Paddle:
         self.y2 = self.y1 + self.height
 
     def move(self):
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                    self.key_pressed_left = True
-                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                    self.key_pressed_right = True
-                elif event.key == pygame.K_SPACE:
-                    self.key_pressed_left = False
-                    self.key_pressed_right = False
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                    self.key_pressed_left = False
-                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                    self.key_pressed_right = False
-        if self.key_pressed_left:
+        prsd = pygame.key.get_pressed()
+        if prsd[pygame.K_LEFT]:
             self.x1 -= 5
-        if self.key_pressed_right:
+        if prsd[pygame.K_RIGHT]:
             self.x1 += 5
         if self.x1 < 0:
             self.x1 = 0
