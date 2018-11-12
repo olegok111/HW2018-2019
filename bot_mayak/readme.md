@@ -2,4 +2,5 @@
 ==================================
 * python-telegram-bot
 * python-telegram-bot[socks]
+---
 Для этого используется команда **pip install** ***имя_модуля***.
