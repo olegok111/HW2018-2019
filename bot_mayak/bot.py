@@ -2,6 +2,7 @@
 import config
 from telegram.ext import Updater, CommandHandler
 import logging
+import parser
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 WITH_PROXY = False  # You need to change this variable to True if you want to start the bot with a proxy, which is configured in config.py.
@@ -27,7 +28,9 @@ links_textfile.close()
 
 
 def start(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="Начнём! Введите комманду команду '/s запрос' или '/search запрос', чтобы начать поиск.")
+    txt = "Начнём!\n Введите команду '/s запрос' или '/search запрос', чтобы начать поиск." + \
+        "\nВведите команду '/u' или '/update', чтобы обновить список подкастов."
+    bot.send_message(chat_id=update.message.chat_id, text=txt)
 
 
 def search(bot, update, args):
@@ -41,9 +44,16 @@ def search(bot, update, args):
             substr += k + podcasts[k] + '\n'
     bot.send_message(chat_id=update.message.chat_id, text="Результаты поиска:\n" + substr)
 
+def podcast_list_update(bot, update):
+    bot.send_message(chat_id=update.message.chat_id, text="Идёт обновление списка подкастов...")
+    parser.main()
+    bot.send_message(chat_id=update.message.chat_id, text="Обновление завершено!")
+
 
 start_handler = CommandHandler('start', start)
 dispatcher.add_handler(start_handler)
 search_handler = CommandHandler(['s', 'search'], search, pass_args=True)
 dispatcher.add_handler(search_handler)
+update_handler = CommandHandler(['u', 'update'], podcast_list_update)
+dispatcher.add_handler(update_handler)
 updater.start_polling()
