@@ -2,10 +2,10 @@
 import config
 from telegram.ext import Updater, CommandHandler
 import logging
-import parser
+import parser_prg as parser
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-WITH_PROXY = False  # You need to change this variable to True if you want to start the bot with a proxy, which is configured in config.py.
+WITH_PROXY = True  # You need to change this variable to True if you want to start the bot with a proxy, which is configured in config.py.
 if WITH_PROXY:
     updater = Updater(token=config.TOKEN, request_kwargs=config.REQUEST_KWARGS)
 else:
@@ -21,7 +21,7 @@ for link_line in links_lines:
     podcast_link = link_line[link_line.find('http'):]
     if podcast_title == ' ':
         unnamed_count += 1
-        podcasts['Без имени ' + str(unnamed_count)] = podcast_link
+        podcasts['Без имени ' + str(unnamed_count) + ' '] = podcast_link
     else:
         podcasts[podcast_title] = podcast_link
 links_textfile.close()
@@ -32,20 +32,29 @@ def start(bot, update):
         "\nВведите команду '/u' или '/update', чтобы обновить список подкастов."
     bot.send_message(chat_id=update.message.chat_id, text=txt)
 
-
 def search(bot, update, args):
-    title = ''
-    for arg in args:
-        title += arg + ' '
-    title = title[:-1]
-    substr = ''
-    for k in podcasts.keys():
-        if title in k:
-            substr += k + podcasts[k] + '\n'
-    bot.send_message(chat_id=update.message.chat_id, text="Результаты поиска:\n" + substr)
+    try:
+        if podcasts == {}:
+            bot.send_message(chat_id=update.message.chat_id, text="Идёт получение списка подкастов. Это займёт около 5 минут.")
+            parser.main()
+        title = ''
+        for arg in args:
+            title += arg + ' '
+        title = title[:-1]
+        substr = ''
+        search_results = []
+        for k in podcasts.keys():
+            if title in k:
+                search_results.append(k + podcasts[k])
+        search_results.sort()
+        for res in search_results:
+            substr += res + '\n'
+        bot.send_message(chat_id=update.message.chat_id, text="Результаты поиска:\n" + substr)
+    except:
+        bot.send_message(chat_id=update.message.chat_id, text="Введите запрос.")
 
 def podcast_list_update(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="Идёт обновление списка подкастов...")
+    bot.send_message(chat_id=update.message.chat_id, text="Идёт обновление списка подкастов. Это займёт около 5 минут.")
     parser.main()
     bot.send_message(chat_id=update.message.chat_id, text="Обновление завершено!")
 
