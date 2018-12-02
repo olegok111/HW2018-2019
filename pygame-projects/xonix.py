@@ -18,21 +18,17 @@ def to_normal(grid_x, grid_y):
     y = grid_y * 10
     return x, y
 
-def fill_area(xnx, brd, side='l'):
-    for block in brd:
-        while block not in land:
-            try:
-                if block[0] > xnx.right_extremum:
-                    break
-            except Exception as e:
-                print(e)
-            land.append(block)
-            block_normal = to_normal(block[0], block[1])
-            pygame.draw.rect(screen, GRAY, [block_normal[0], block_normal[1], 10, 10])
-            if side == 'l':
-                block = (block[0] + 1, block[1])
-            elif side == 'd':
-                block = (block[0], block[1] - 1)
+
+def antipod(d):
+    if d == 'l':
+        return 'r'
+    elif d == 'r':
+        return 'l'
+    elif d == 'u':
+        return 'd'
+    else:
+        return 'u'
+
 
 class Xonix:
 
@@ -44,51 +40,91 @@ class Xonix:
         self.color = BLUE
         self.speed = 2
         self.direction = 'l'
+        self.dirchg = False
         self.in_land = True
-        self.newfoundland = False
-        self.left_border = []
-        self.down_border = []
-        self.right_extremum = None
+        self.fill_data = []
+        self.line_begin = False
 
     def draw(self):
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.r)
 
+    def fill_area(self):
+        for data_piece in self.fill_data:
+            fill_direction = data_piece[2]
+            grid_x = data_piece[0]
+            grid_y = data_piece[1]
+            while (grid_x, grid_y) not in land and (grid_x, grid_y) not in line:
+                land.append((grid_x, grid_y))
+                if fill_direction == 'l':
+                    grid_x -= 1
+                elif fill_direction == 'r':
+                    grid_x += 1
+                elif fill_direction == 'u':
+                    grid_y -= 1
+                else:
+                    grid_y += 1
+
     def param_update(self):
         self.grid = to_grid(self.x, self.y)
-        if not self.in_land and self.grid in land:
-            self.newfoundland = True
-            self.in_land = True
-        else:
-            if self.newfoundland:
-                self.newfoundland = False
-                self.right_extremum = None
-            self.in_land = self.grid in land
+        if self.line_begin:
+            self.line_begin = False
+        if self.grid not in land and self.in_land:
+            self.line_begin = True
+        self.in_land = self.grid in land
 
     def motion(self):
         global land, line, available_space
         prsd = pygame.key.get_pressed()
         self.param_update()
         if self.grid not in line:
-            if self.direction == 'l' or self.direction == 'r':
-                '''
-                count = 1
-                check_grid = self.grid
-                while True:
-                    if check_grid in land or check_grid in line:
-                        break
-                    check_grid = (check_grid[0], check_grid[1]-1)
-                    count += 1
-                line.append((self.grid[0], self.grid[1], 'u', count))'''
+            grd = self.grid[:]
+            if self.line_begin:
+                if self.direction in ('l', 'r'):
+                    self.fill_data.append((self.grid[0], self.grid[1], 'u'))
+                else:
+                    self.fill_data.append((self.grid[0], self.grid[1], 'l'))
+            else:
+                if self.dirchg:
+                    while grd not in land and grd not in line:
+                        if self.direction == 'l':
+                            grd = (grd[0]-1, grd[1])
+                        elif self.direction == 'r':
+                            grd = (grd[0]+1, grd[1])
+                        elif self.direction == 'u':
+                            grd = (grd[0], grd[1]-1)
+                        else:
+                            grd = (grd[0], grd[1]+1)
+                        self.fill_data.append((grd[0], grd[1], self.fill_data[-1][2]))
+                else:
+                    try:
+                        if self.fill_data[-1][2] == self.direction:
+                            cur_fill_dir = antipod(self.fill_data[-1][2])
+                            self.fill_data.append((self.grid[0], self.grid[1], cur_fill_dir))
+                            for data_piece in self.fill_data:
+                                if data_piece[2] == antipod(cur_fill_dir): # взаимоуничтожение лишних направлений
+                                    if cur_fill_dir == 'l' and data_piece[1] == self.grid[1] and data_piece[0] < self.grid[0] or \
+                                        cur_fill_dir == 'r' and data_piece[1] == self.grid[1] and data_piece[0] > self.grid[0] or \
+                                        cur_fill_dir == 'u' and data_piece[0] == self.grid[0] and data_piece[1] > self.grid[1] or \
+                                        cur_fill_dir == 'd' and data_piece[0] == self.grid[0] and data_piece[1] < self.grid[1]:
+                                        self.fill_data.remove(data_piece)
+                        else:
+                            cur_fill_dir = self.fill_data[-1][2]
+                            self.fill_data.append((self.grid[0], self.grid[1], cur_fill_dir))
+                            for data_piece in self.fill_data:
+                                if data_piece[2] == antipod(cur_fill_dir): # взаимоуничтожение лишних направлений
+                                    if cur_fill_dir == 'l' and data_piece[1] == self.grid[1] and data_piece[0] < self.grid[0] or \
+                                        cur_fill_dir == 'r' and data_piece[1] == self.grid[1] and data_piece[0] > self.grid[0] or \
+                                        cur_fill_dir == 'u' and data_piece[0] == self.grid[0] and data_piece[1] > self.grid[1] or \
+                                        cur_fill_dir == 'd' and data_piece[0] == self.grid[0] and data_piece[1] < self.grid[1]:
+                                        self.fill_data.remove(data_piece)
+                        print(cur_fill_dir)
+                    except:
+                        pass
             line.append(self.grid)
-
-        if self.newfoundland:
-            fill_area(self, self.left_border)
-            fill_area(self, self.down_border, side='d')
-            print(self.left_border)
-            print(self.down_border)
-
         if self.in_land:
             line = []
+            self.fill_area()
+            self.fill_data = []
             if prsd[pygame.K_RIGHT]:
                 self.x += self.speed
             elif prsd[pygame.K_LEFT]:
@@ -98,40 +134,32 @@ class Xonix:
             elif prsd[pygame.K_UP]:
                 self.y -= self.speed
         else:
+            if self.dirchg:
+                self.dirchg = False
             if prsd[pygame.K_RIGHT]:
+                if self.direction != 'r':
+                    self.dirchg = True
                 self.direction = 'r'
             elif prsd[pygame.K_LEFT]:
+                if self.direction != 'l':
+                    self.dirchg = True
                 self.direction = 'l'
             elif prsd[pygame.K_DOWN]:
+                if self.direction != 'd':
+                    self.dirchg = True
                 self.direction = 'd'
             elif prsd[pygame.K_UP]:
+                if self.direction != 'u':
+                    self.dirchg = True
                 self.direction = 'u'
             if self.direction == 'r':
                 self.x += self.speed
-                self.down_border.append(self.grid)
             elif self.direction == 'l':
                 self.x -= self.speed
-                self.down_border.append(self.grid)
             elif self.direction == 'd':
                 self.y += self.speed
-                self.left_border.append(self.grid)
-                try:
-                    if self.right_extremum == None:
-                        self.right_extremum = self.grid[0]
-                    elif self.right_extremum < self.grid[0]:
-                        self.right_extremum = self.grid[0]
-                except Exception as e:
-                    print(e)
             elif self.direction == 'u':
                 self.y -= self.speed
-                self.left_border.append(self.grid)
-                try:
-                    if self.right_extremum == None:
-                        self.right_extremum = self.grid[0]
-                    elif self.right_extremum < self.grid[0]:
-                        self.right_extremum = self.grid[0]
-                except Exception as e:
-                    print(e)
         self.draw()
 
 xnx = Xonix()
