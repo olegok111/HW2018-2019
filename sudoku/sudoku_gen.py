@@ -17,8 +17,7 @@ def adjust_cols_from_strs(cols: list, strs: list):
     return new_cols
     
 
-def main():
-    global pole_strs
+def generate_field():
     pole_strs = []
     pole_cols = []
     cur_column = -1
@@ -52,15 +51,26 @@ def main():
         random.shuffle(new_block)
         pole_cols[block_index*3:block_index*3+3] = new_block
     pole_strs = adjust_strs_from_cols(pole_cols, pole_strs)
+    return pole_strs
 
 
-def print_pole():
-    for az in pole_strs:
+def print_pole(strs:list):
+    for az in strs:
         for buki in az:
             print(buki, end=' ')
         print()
 
 
+def write_to_txt(strs:list):
+    with open('field.txt', 'w', encoding='utf8') as file:
+        for pole_str in strs:
+            for pole_elem in pole_str:
+                print(pole_elem, end=' ', file=file)
+            print(file=file)
+        print('---', file=file)
+
+
 if __name__ == '__main__':
-    main()
-    print_pole()
+    field_strs = generate_field()
+    print_pole(field_strs)
+    write_to_txt(field_strs)
