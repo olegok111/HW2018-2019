@@ -19,7 +19,7 @@ def adjust_cols_from_strs(strs: list):
     for i in range(9):
         col = []
         for j in range(9):
-            col.append(9)
+            col.append(0)
         cols.append(col)
 
     for str_index in range(9):
