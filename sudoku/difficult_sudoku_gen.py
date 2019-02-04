@@ -1,12 +1,12 @@
 import random
 
 
-def read_field():
-    with open('field.txt', 'r', encoding='utf8') as field_file:
+def read_field(file='field.txt'):
+    with open(file, 'r', encoding='utf8') as field_file:
         lines = field_file.readlines()
         rows = []
         for line in lines:
-            row = list(map(int, line.split()))
+            row = line.split()
             rows.append(row)
     return rows
 
@@ -38,7 +38,7 @@ def write_to_txt(rows, filename):
             print(file=file)
 
 
-if __name__ == '__main__':
+def main():
     field = read_field()
     d = int(input('Enter difficulty (1-3):'))
     new_field = set_difficulty(field, d)
