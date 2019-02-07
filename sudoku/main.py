@@ -8,16 +8,16 @@ def gen_pdf(field_rows:list):
     c = 0
     for row in field_rows:
         c += 1
-        row.insert(6, '   ')
-        row.insert(3, '   ')
-        new_rows.append(''.join(list(map(str, row))))
+        row.insert(6, '  ')
+        row.insert(3, '  ')
+        new_rows.append(' '.join(list(map(str, row))))
         if c % 3 == 0:
             new_rows.append('')
 
     pdf = FPDF(unit='mm')
     pdf.add_font('BPmono', '', 'BPmonoItalics.ttf', uni=True)
     pdf.add_page()
-    pdf.set_font('Helvetica', size=16)
+    pdf.set_font('BPmono', size=16)
     ln = 0
     for row in new_rows:
         ln += 1
