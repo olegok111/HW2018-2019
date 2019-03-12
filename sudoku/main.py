@@ -1,6 +1,7 @@
 from sudoku_gen import main as sudoku_gen
-from difficult_sudoku_gen import main as diff_gen, read_field
+from difficult_sudoku_gen import main as diff_gen
 from fpdf import FPDF
+import utils
 
 
 def gen_pdf(field_rows:list):
@@ -28,5 +29,5 @@ def gen_pdf(field_rows:list):
 if __name__ == '__main__':
     sudoku_gen()
     diff_gen()
-    f = read_field('new_field.txt')
+    f = utils.read_field('new_field.txt')
     gen_pdf(f)

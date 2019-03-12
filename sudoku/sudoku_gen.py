@@ -1,32 +1,5 @@
 import random
-
-
-def adjust_rows_from_cols(cols: list):
-    rows = []
-    for i in range(9):
-        _row = []
-        for j in range(9):
-            _row.append(0)
-        rows.append(_row)
-    for col_index in range(9):
-        for elem_index in range(9):
-            rows[elem_index][col_index] = cols[col_index][elem_index]
-    return rows
-
-
-def adjust_cols_from_rows(rows: list):
-    cols = []
-    for i in range(9):
-        col = []
-        for j in range(9):
-            col.append(0)
-        cols.append(col)
-
-    for row_index in range(9):
-        for elem_index in range(9):
-            cols[elem_index][row_index] = rows[row_index][elem_index]
-    return cols
-
+import utils
 
 def generate_primary_field():
     decset = [i for i in range(1,10)]
@@ -67,7 +40,7 @@ def generate_field():
     for row_block in row_blocks:
         new_pole_rows.extend(row_block)
     pole_rows = new_pole_rows
-    pole_cols = adjust_cols_from_rows(pole_rows)
+    pole_cols = utils.adjust_cols_from_rows(pole_rows)
     # shuffling columns
     col_block0 = pole_cols[:3]
     random.shuffle(col_block0)
@@ -81,16 +54,9 @@ def generate_field():
     for col_block in col_blocks:
         new_pole_cols.extend(col_block)
     pole_cols = new_pole_cols
-    pole_rows = adjust_rows_from_cols(pole_cols)
+    pole_rows = utils.adjust_rows_from_cols(pole_cols)
 
     return pole_rows
-
-
-def print_pole(rows):
-    for az in rows:
-        for buki in az:
-            print(buki, end=' ')
-        print()
 
 
 def write_to_txt(rows, filename):
