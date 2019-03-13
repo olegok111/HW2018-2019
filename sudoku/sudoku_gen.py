@@ -59,14 +59,6 @@ def generate_field():
     return pole_rows
 
 
-def write_to_txt(rows, filename):
-    with open(filename, 'w', encoding='utf8') as file:
-        for pole_row in rows:
-            for pole_elem in pole_row:
-                print(pole_elem, end=' ', file=file)
-            print(file=file)
-
-
 def main():
     field_rows = generate_field()
-    write_to_txt(field_rows, 'field.txt')
+    utils.write_to_txt(field_rows, 'field.txt')

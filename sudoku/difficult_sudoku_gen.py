@@ -1,5 +1,6 @@
 import random
 import utils
+import sudoku_gen
 
 
 def set_difficulty(field_rows:list, difficulty:int):
@@ -22,8 +23,8 @@ def set_difficulty(field_rows:list, difficulty:int):
 
 
 
-def main():
+def main(difficulty):
+    sudoku_gen.main()
     field = utils.read_field()
-    d = int(input('Enter difficulty (1-3):'))
-    new_field = set_difficulty(field, d)
+    new_field = set_difficulty(field, difficulty)
     utils.write_to_txt(new_field, 'new_field.txt')
