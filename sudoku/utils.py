@@ -1,3 +1,4 @@
+from collections import Counter
 
 def adjust_rows_from_cols(cols: list):
     rows = []
@@ -54,3 +55,19 @@ def write_to_txt(rows, filename):
             for field_elem in field_row:
                 print(field_elem, end=' ', file=file)
             print(file=file)
+
+def check_solution(strs):
+    for row in strs:
+        new_row = row.copy()
+        while 'X' in new_row:
+            new_row.remove('X')
+        if 2 in Counter(new_row).keys():
+            return False
+    for x in range(0, 9, 3):
+        for y in range(0, 9, 3):
+            sq_elems = get_square_elements(x, y, strs)
+            while 'X' in sq_elems:
+                sq_elems.remove('X')
+            if 2 in Counter(sq_elems).keys():
+                return False
+    return True
