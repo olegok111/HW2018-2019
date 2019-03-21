@@ -3,6 +3,7 @@ from difficult_sudoku_gen import main as diff_gen
 from sudoku_solver import main as sudoku_solver
 from fpdf import FPDF
 import utils
+from graphics_app import main as GA
 
 
 def gen_pdf(field_rows:list):
@@ -43,7 +44,7 @@ if __name__ == '__main__':
         diff_gen(1)
         sudoku_solver()
     elif program == 4:
-        pass
+        GA(1)
 
 
     f = utils.read_field('new_field.txt')
