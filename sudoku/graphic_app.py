@@ -3,12 +3,11 @@ import utils as utils
 from difficult_sudoku_gen import main as diff_gen
 
 BLACK = (  0,  0,  0)
-RED   = ( 70,  0,  0)
+DARK_RED = (40, 0, 0)
+DARK_GREEN = (0, 40, 0)
 WHITE = (255,255,255)
 GREEN = (  0, 70,  0)
 GRAY  = (127,127,127)
-LGREEN = (50, 180, 50)
-LRED = (180, 50, 50)
 
 pygame.font.init()
 FONT = pygame.font.SysFont('Tahoma', 26)
@@ -30,8 +29,6 @@ f6 = FONT.render('6', False, GRAY)
 f7 = FONT.render('7', False, GRAY)
 f8 = FONT.render('8', False, GRAY)
 f9 = FONT.render('9', False, GRAY)
-CORRECT_SOLUTION_TEXT = FONT.render('Correct!', False, LGREEN)
-WRONG_SOLUTION_TEXT = FONT.render('Wrong!', False, LRED)
 USER_NUMBERS = [s1,s2,s3,s4,s5,s6,s7,s8,s9]
 FIXED_NUMBERS = [f1,f2,f3,f4,f5,f6,f7,f8,f9]
 SCREEN = pygame.display.set_mode((1024, 768))
@@ -145,6 +142,7 @@ def main(difficulty):
     objects = []
     cur = Cursor()
     prev_sel = (0, 0)
+    screen_color = BLACK
     for x in range(9):
         row = []
         for y in range(9):
@@ -155,26 +153,32 @@ def main(difficulty):
                 row.append(Number(None, x, y))
         objects.append(row)
     while True:
+        SCREEN.fill(screen_color)
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 exit(0)
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                if utils.checker(strs):
+                    screen_color = DARK_GREEN
+                else:
+                    screen_color = DARK_RED
         clock.tick(20)
         cur.exist()
         objects[prev_sel[0]][prev_sel[1]].selected = False
         objects[cur.gx][cur.gy].selected = True
-        #print(cur.number)
         if not objects[cur.gx][cur.gy].fixed and cur.number_pressed and cur.number:
             if cur.number == 'd':
                 objects[cur.gx][cur.gy].number = None
+                strs[cur.gx][cur.gy] = 'X'
             else:
                 objects[cur.gx][cur.gy].number = cur.number
+                strs[cur.gx][cur.gy] = cur.number
         prev_sel = (cur.gx, cur.gy)
         for row in objects:
             for obj in row:
                 obj.exist()
         pygame.display.flip()
-
 
 if __name__ == '__main__':
     main(1)

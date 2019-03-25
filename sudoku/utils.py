@@ -1,5 +1,4 @@
 from collections import Counter
-
 def adjust_rows_from_cols(cols: list):
     rows = []
     for i in range(9):
@@ -38,7 +37,7 @@ def get_square_elements(x, y, strs): # int -> int -> list(list(int)) -> set(int)
     for str_coord in str_coords:
         for col_coord in col_coords:
             res.append(strs[str_coord][col_coord])
-    return set(res)
+    return res
 
 def read_field(file='field.txt'):
     with open(file, 'r', encoding='utf8') as field_file:
@@ -56,18 +55,27 @@ def write_to_txt(rows, filename):
                 print(field_elem, end=' ', file=file)
             print(file=file)
 
-def check_solution(strs):
-    for row in strs:
-        new_row = row.copy()
-        while 'X' in new_row:
-            new_row.remove('X')
-        if 2 in Counter(new_row).keys():
-            return False
-    for x in range(0, 9, 3):
-        for y in range(0, 9, 3):
-            sq_elems = get_square_elements(x, y, strs)
-            while 'X' in sq_elems:
-                sq_elems.remove('X')
-            if 2 in Counter(sq_elems).keys():
-                return False
-    return True
+def checker(rows):
+
+    cols = adjust_cols_from_rows(rows)
+    correct = True
+    for r in rows:
+        R = r[:]
+        while 'X' in R:
+            R.remove('X')
+        if 2 in Counter(R).values():
+            correct = False
+    for c in cols:
+        C = c[:]
+        while 'X' in C:
+            C.remove('X')
+        if 2 in Counter(C).values():
+            correct = False
+    for sq_x in range(3):
+        for sq_y in range(3):
+            square = get_square_elements(sq_x*3, sq_y*3, rows)
+            while 'X' in square:
+                square.remove('X')
+            if 2 in Counter(square).values():
+                correct = False
+    return correct
