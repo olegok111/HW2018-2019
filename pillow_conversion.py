@@ -1,6 +1,3 @@
-# TODO: custom conversion to two symbols
-# TODO: GUI
-
 from PIL import Image
 import easygui
 
